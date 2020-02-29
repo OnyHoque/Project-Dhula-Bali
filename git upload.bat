@@ -2,5 +2,5 @@
 git add .
 set /p comment= Enter commit comment here:
 git commit -m "%comment%"
-git push
+git push origin master
 cmd /k
