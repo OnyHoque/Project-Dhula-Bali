@@ -27,7 +27,11 @@
 #include "DHT.h"
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include "time.h"
 
+const char* ntpServer = "pool.ntp.org";
+const long  gmtOffset_sec = 21600;
+const int   daylightOffset_sec = 3600;
 
 
 #define RXD2 16
@@ -64,7 +68,8 @@ void setup(){
   dht.begin();
   dustSensor.begin();
   pinMode(LDR1,INPUT);
-
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  
   Serial.println("ESP32: Loop begins");
 }
 
@@ -75,12 +80,14 @@ String temp="";
 String humidity="";
 String dustDensity = "";
 String lightIntensity = "";
+String dt = "";
 
 void loop(){
   getGPS();
   getTempandHumidity();
   getDustDensity();
   getLDR();
+  getLocalTime();
 
   Serial.print("LAT:"+gps_lat);
   Serial.print("    ");
@@ -94,9 +101,22 @@ void loop(){
   Serial.print("    ");
   Serial.print("Light intensity:"+lightIntensity);
   Serial.println();
+  
 
-//  http.begin("");
+  http.begin("118.179.43.155:5001/cse460.php?date="+dt+"&lat="+gps_lat+"&lng="+gps_lng+"&temp="+temp+"&humidity="+humidity+"&dust="+dustDensity+"&light="+lightIntensity);
   delay(2000);
+}
+
+void getLocalTime()
+{
+  struct tm timeinfo;
+  if(!getLocalTime(&timeinfo)){
+    Serial.println("Failed to obtain time");
+    return;
+  }
+  char timeStringBuff[50];
+  strftime(timeStringBuff, sizeof(timeStringBuff), "%A, %B %d %Y %H:%M:%S", &timeinfo);
+  dt = String(timeStringBuff);
 }
 
 void getGPS(){
