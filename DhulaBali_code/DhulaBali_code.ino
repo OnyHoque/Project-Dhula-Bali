@@ -52,17 +52,26 @@ HTTPClient http;
 const char* ssid = "Ony wifi 2";
 const char* password = "2107199500";
 
+String gps_lat="";
+String gps_lng="";
+String temp="";
+String humidity="";
+String dustDensity = "";
+String lightIntensity = "";
+String dt = "";
+
 void setup(){
   Serial.begin(115200);
   delay(5000);
   WiFi.begin(ssid, password);
-  Serial.println("Connecting to WiFi");
+  Serial.print("Connecting to WiFi");
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
     Serial.print(" . ");
-  } 
-  Serial.println("Connected to the WiFi network");
-
+  }
+  Serial.println(" . ");
+  Serial.println("!!!Connected!!!");
+  Serial.println(WiFi.localIP());
   
   Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
   dht.begin();
@@ -73,15 +82,6 @@ void setup(){
   Serial.println("ESP32: Loop begins");
 }
 
-
-String gps_lat="";
-String gps_lng="";
-String temp="";
-String humidity="";
-String dustDensity = "";
-String lightIntensity = "";
-String dt = "";
-
 void loop(){
   getGPS();
   getTempandHumidity();
@@ -89,33 +89,52 @@ void loop(){
   getLDR();
   getLocalTime();
 
-  Serial.print("LAT:"+gps_lat);
-  Serial.print("    ");
-  Serial.print("LNG:"+gps_lng);
-  Serial.print("    ");
-  Serial.print("TEMP:"+temp);
-  Serial.print("    ");
-  Serial.print("Humidity:"+humidity);
-  Serial.print("    ");
-  Serial.print("Dust Density:"+dustDensity);
-  Serial.print("    ");
-  Serial.print("Light intensity:"+lightIntensity);
-  Serial.println();
-  
-
-  http.begin("118.179.43.155:5001/cse460.php?date="+dt+"&lat="+gps_lat+"&lng="+gps_lng+"&temp="+temp+"&humidity="+humidity+"&dust="+dustDensity+"&light="+lightIntensity);
-  delay(2000);
+//  Serial.print("LAT:"+gps_lat);
+//  Serial.print("    ");
+//  Serial.print("LNG:"+gps_lng);
+//  Serial.print("    ");
+//  Serial.print("TEMP:"+temp);
+//  Serial.print("    ");
+//  Serial.print("Humidity:"+humidity);
+//  Serial.print("    ");
+//  Serial.print("Dust Density:"+dustDensity);
+//  Serial.print("    ");
+//  Serial.print("Light intensity:"+lightIntensity);
+//  Serial.println();
+  Serial.println(dt);
+  uploadData();
+  delay(4000);
 }
 
-void getLocalTime()
-{
+void uploadData(){
+  String str = "http://118.179.43.155:5001/dsd/post.php?f2="+dt;
+  str = str + "&f3="+gps_lat;
+  str = str + "&f4="+gps_lng;
+  str = str + "&f5="+temp;
+  str = str + "&f6="+humidity;
+  str = str + "&f7="+dustDensity;
+  str = str + "&f8="+lightIntensity;
+
+  http.begin(str);
+  int httpCode = http.GET();
+  if (httpCode > 0) {
+    Serial.println("Uploading successful.");
+    String payload = http.getString();
+    Serial.print("Payload: ");
+    Serial.println(payload);
+  }else{
+    Serial.println("Uploading failed.");
+  }
+}
+
+void getLocalTime(){
   struct tm timeinfo;
   if(!getLocalTime(&timeinfo)){
     Serial.println("Failed to obtain time");
     return;
   }
   char timeStringBuff[50];
-  strftime(timeStringBuff, sizeof(timeStringBuff), "%A, %B %d %Y %H:%M:%S", &timeinfo);
+  strftime(timeStringBuff, sizeof(timeStringBuff), "%d_%H_%M_%S", &timeinfo);
   dt = String(timeStringBuff);
 }
 
