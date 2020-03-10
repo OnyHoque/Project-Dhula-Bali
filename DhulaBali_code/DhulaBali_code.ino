@@ -107,7 +107,7 @@ void loop(){
 }
 
 void uploadData(){
-  String str = "http://118.179.43.155:5001/dsd/post.php?f2="+dt;
+  String str = "https://innovative-everyday.com/dsd.php?status=in&f2="+dt;
   str = str + "&f3="+gps_lat;
   str = str + "&f4="+gps_lng;
   str = str + "&f5="+temp;
