@@ -20,8 +20,9 @@ void loop() {
   
   double dustDensity1 = map(dustDensity,0 , 4096,0, 1023);
   Serial.print(dustDensity1);
-  Serial.println(" ug/m3");
-  Serial.println(dustDensity);
+  Serial.print(" ug/m3(Map)    ");
+  Serial.print(dustDensity);
+  Serial.println(" ug/m3(Real)");
 
   delay(5000);
 }

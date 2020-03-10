@@ -4,21 +4,21 @@
  *  17 TX
  *  
  *  DTH11 Sensor
- *  2 - Data Input
+ *  4 - Data Input
  *  
  *  Sharp Dust Sensor
  *  Pin 1 (BLU) - IR LED power (5V via supplied 150 Ohm resistor)
  *  Pin 2 (GRN) - GND
  *  Pin 3 (WHT) - pin 27
  *  Pin 4 (YEL) - GND (connected to case)
- *  Pin 5 (BLK) - pin 26
+ *  Pin 5 (BLK) - pin 33
  *  Pin 6 (RED) - 5V power
  *  
  *  LDR light intensity
  *  pin 34
  */
  
-// pin used up : 2, 16, 17, 26, 27, 34
+// pin used up : 4, 16, 17, 26, 27, 33
 
 
 #include <TinyGPS++.h>
@@ -36,9 +36,9 @@ const int   daylightOffset_sec = 3600;
 
 #define RXD2 16
 #define TXD2 17
-#define measurePin 26
+#define measurePin 33
 #define ledPin 27
-#define DHTPIN 2
+#define DHTPIN 4
 #define LDR1 34
 #define DHTTYPE DHT11
 
@@ -93,14 +93,14 @@ void loop(){
 //  Serial.print("    ");
 //  Serial.print("LNG:"+gps_lng);
 //  Serial.print("    ");
-//  Serial.print("TEMP:"+temp);
-//  Serial.print("    ");
-//  Serial.print("Humidity:"+humidity);
-//  Serial.print("    ");
-//  Serial.print("Dust Density:"+dustDensity);
-//  Serial.print("    ");
+  Serial.print("TEMP:"+temp);
+  Serial.print("    ");
+  Serial.print("Humidity:"+humidity);
+  Serial.print("    ");
+  Serial.print("Dust Density:"+dustDensity);
+  Serial.print("    ");
 //  Serial.print("Light intensity:"+lightIntensity);
-//  Serial.println();
+  Serial.println();
   Serial.println(dt);
   uploadData();
   delay(4000);
@@ -150,7 +150,9 @@ void getGPS(){
 }
 
 void getDustDensity(){
-  dustDensity = String(dustSensor.read());
+  float val = dustSensor.read();
+  val = map(val,0 , 4096,0, 1023);
+  dustDensity = String(val);
 }
 
 void getLDR(){
